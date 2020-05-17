@@ -15,7 +15,7 @@ class GroupsAPIController extends Controller
 {
     public function index(Request $request)
     {
-        $groups = Group::all('group_id');
+        $groups = Group::all(['group_id', 'group_name']);
 
         return Response::json([
             'success' => true,
@@ -26,23 +26,33 @@ class GroupsAPIController extends Controller
     public function store(CreateGroupRequest $request)
     {
         $groupID = $request->group_id;
-        // Если 0, значит нам прислали имя в uri - надо получить айди
-        if ((int)$groupID === 0) {
-            $res = json_decode(Http::withHeaders([
-                'origin' => 'http://v258027.hosted-by-vdsina.ru',
-            ])->get(VK::VK_DEFAULT_URI . VK::VK_METHOD_GET_GROUP_INFO, [
-                'v' => VK::VK_VERSION,
-                'access_token' => VK::VK_API_ACCESS_TOKEN,
-                'group_id' => $groupID,
-            ]), true);
-            if (!empty($res['error'])) {
-                return Response::json([
-                    'success' => false,
-                    'message' => 'Сообщества с таким именем не существует'
-                ]);
-            }
-            $groupID = $res['response'][0]['id'];
+        $groupName = '';
+        // Делаем запрос в вк апи, чтобы убедиться, что группа не залочена или не закрыта
+        $res = json_decode(Http::withHeaders([
+            'origin' => 'http://v258027.hosted-by-vdsina.ru',
+        ])->get(VK::VK_DEFAULT_URI . VK::VK_METHOD_GET_GROUP_INFO, [
+            'v' => VK::VK_VERSION,
+            'access_token' => VK::VK_API_ACCESS_TOKEN,
+            'group_id' => $groupID,
+        ]), true);
+        if (!empty($res['error'])) {
+            return Response::json([
+                'success' => false,
+                'message' => 'Сообщества с таким именем не существует'
+            ]);
         }
+        // Если группа заблокирована или не находится в публичном доступе
+        // Нет смысла за ней следить
+        if ($res['response'][0]['is_closed'] === 1 || !empty($res['response'][0]['deactivated'])) {
+            return Response::json([
+                'success' => false,
+                'message' => 'Данная группа заблокирована или является закрытой'
+            ]);
+        }
+
+        $groupID = $res['response'][0]['id'];
+        $groupName = $res['response'][0]['name'];
+
         if (Group::where('group_id', $groupID)->first()) {
             return Response::json([
                 'success' => false,
@@ -52,6 +62,7 @@ class GroupsAPIController extends Controller
 
         /** @var Group $group */
         $group = Group::create([
+            'group_name' => $groupName,
             'group_id' => $groupID
         ]);
 

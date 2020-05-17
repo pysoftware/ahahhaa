@@ -10,8 +10,15 @@ class Group extends Model
     protected $table = 'groups';
 
     protected $fillable = [
-        'group_id'
+        'group_id', 'group_name'
     ];
+
+    public function getGroupNameAttribute($groupName)
+    {
+        return $groupName
+            ? $groupName
+            : "Группа #{$this->group_id}";
+    }
 
     public function posts()
     {

@@ -13,6 +13,11 @@
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="/resources/css/loading.css" rel="stylesheet">
     <title>VK SSSS</title>
+    <style>
+        .dropdown-items {
+            min-width: 1200rem;
+        }
+    </style>
 </head>
 <body>
 
