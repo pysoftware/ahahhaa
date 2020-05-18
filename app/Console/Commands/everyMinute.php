@@ -68,10 +68,16 @@ class everyMinute extends Command
                             'post_id' => $post['id'],
                             'group_id' => $group->id
                         ]);
+                        $likesCount = !empty($post['likes'])
+                            ? $post['likes']['count']
+                            : 0;
+                        $viewsCount = !empty($post['views'])
+                            ? $post['views']['count']
+                            : 0;
                         Counter::create([
                             'post_id' => $newPost->id,
-                            'likes_count' => $post['likes']['count'],
-                            'views_count' => $post['views']['count'],
+                            'likes_count' => $likesCount,
+                            'views_count' => $viewsCount,
                         ]);
                     }
                 }
