@@ -135,7 +135,7 @@ export const PostAnalysis = () => {
                 </a>
             </h6>
             <h4>
-                <a href={`https://vk.com/wall-${groupID}_${postID}`}>
+                <a href={`https://vk.com/wall-${groupID}_${postID}`} target={"_blank"}>
                     Ссылка на пост
                 </a>
             </h4>
